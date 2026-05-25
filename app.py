@@ -583,6 +583,22 @@ def diagnosa():
     klas = map_risk_to_label(crisp)
     diag, saran, level = TABEL_DIAGNOSIS.get(klas, ("Tidak diketahui","Konsultasi dokter.","sedang"))
     
+    # Kustomisasi saran berdasarkan Jenis Kelamin (Post-Processing)
+    if jk in ['Male', 'Laki-laki']:
+        if klas == 'Dengan Risiko':
+            saran = "Modifikasi gaya hidup. Pria cenderung menumpuk lemak di perut, jaga pola makan untuk menghindari risiko penyakit jantung."
+        elif klas == 'Obesitas I':
+            saran = "Risiko tinggi. Khusus pria, waspadai penumpukan lemak perut (visceral fat). Lakukan diet dan kardio teratur."
+        elif klas == 'Obesitas II':
+            saran = "Risiko sangat tinggi! Segera evaluasi klinis kardiovaskular karena pria lebih rentan komplikasi jantung akibat obesitas."
+    else: # Perempuan
+        if klas == 'Dengan Risiko':
+            saran = "Modifikasi gaya hidup. Mulai rutinkan senam atau aerobik untuk menjaga keseimbangan dan kebugaran tubuh."
+        elif klas == 'Obesitas I':
+            saran = "Risiko tinggi. Perhatikan asupan gizi dan keseimbangan hormon. Lakukan aktivitas fisik secara teratur."
+        elif klas == 'Obesitas II':
+            saran = "Risiko sangat tinggi! Lakukan evaluasi klinis medis menyeluruh dan pertimbangkan terapi spesifik."
+            
     imt_val = bb / ((tb / 100) ** 2) if tb > 0 else 0
 
     result = dict(
