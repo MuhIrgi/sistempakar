@@ -1,441 +1,1094 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Pakar Obesitas — Fuzzy Mamdani</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
-        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Inter',sans-serif;background:#080814;color:#d0d0e0;min-height:100vh;overflow-x:hidden}
-        body::before,body::after{content:'';position:fixed;border-radius:50%;filter:blur(120px);opacity:.12;z-index:-1;pointer-events:none}
-        body::before{width:600px;height:600px;background:#00d4aa;top:-200px;left:-100px;animation:fo 20s ease-in-out infinite}
-        body::after{width:500px;height:500px;background:#4f46e5;bottom:-150px;right:-100px;animation:fo 25s ease-in-out infinite reverse}
-        @keyframes fo{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(80px,-60px) scale(1.1)}66%{transform:translate(-40px,40px) scale(.95)}}
-        .container{max-width:1160px;margin:0 auto;padding:2rem 1.5rem}
-        header{text-align:center;padding:2rem 0 1.2rem}
-        .hi{font-size:3rem;display:block;margin-bottom:.6rem;animation:pulse 3s ease-in-out infinite}
-        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-        header h1{font-size:1.9rem;font-weight:800;background:linear-gradient(135deg,#00d4aa,#00b4d8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        header .sub{color:#6a6a8a;font-size:.82rem;margin-top:.4rem}
-        .main-grid{display:grid;grid-template-columns:370px 1fr;gap:2rem;align-items:start;margin-top:1rem}
-        @media(max-width:860px){.main-grid{grid-template-columns:1fr}}
-        .card{background:rgba(18,18,40,.75);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:1.8rem;transition:transform .3s,box-shadow .3s}
-        .card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
-        .ct{font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:1.3rem;display:flex;align-items:center;gap:.5rem}
-        .form-group{margin-bottom:1rem}
-        .form-group label{display:block;font-size:.75rem;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.6px;margin-bottom:.35rem}
-        .form-group input,.form-group select{width:100%;padding:.68rem 1rem;background:rgba(10,10,26,.9);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;color:#e0e0f0;font-family:'Inter',sans-serif;font-size:.93rem;font-weight:500;transition:border-color .3s,box-shadow .3s;appearance:none}
-        .form-group select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238888aa' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
-        .form-group input:focus,.form-group select:focus{outline:none;border-color:#00d4aa;box-shadow:0 0 0 3px rgba(0,212,170,.12)}
-        .form-group .u{font-size:.72rem;color:#6a6a8a;margin-top:.2rem}
-        .btn-d{width:100%;padding:.85rem;margin-top:.7rem;background:linear-gradient(135deg,#00d4aa,#00b4d8);border:none;border-radius:14px;color:#050510;font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .25s,box-shadow .25s}
-        .btn-d:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,212,170,.35)}
-        .imt-p{margin-top:.8rem;padding:.7rem;background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.15);border-radius:12px;text-align:center}
-        .imt-p .lb{font-size:.7rem;color:#00d4aa;text-transform:uppercase;letter-spacing:1px;font-weight:600}
-        .imt-p .vl{font-size:1.5rem;font-weight:800;color:#00d4aa;margin-top:.1rem}
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #080814;
+            color: #d0d0e0;
+            min-height: 100vh;
+            overflow-x: hidden
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: .12;
+            z-index: -1;
+            pointer-events: none
+        }
+
+        body::before {
+            width: 600px;
+            height: 600px;
+            background: #00d4aa;
+            top: -200px;
+            left: -100px;
+            animation: fo 20s ease-in-out infinite
+        }
+
+        body::after {
+            width: 500px;
+            height: 500px;
+            background: #4f46e5;
+            bottom: -150px;
+            right: -100px;
+            animation: fo 25s ease-in-out infinite reverse
+        }
+
+        @keyframes fo {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1)
+            }
+
+            33% {
+                transform: translate(80px, -60px) scale(1.1)
+            }
+
+            66% {
+                transform: translate(-40px, 40px) scale(.95)
+            }
+        }
+
+        .container {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem
+        }
+
+        header {
+            text-align: center;
+            padding: 2rem 0 1.2rem
+        }
+
+        .hi {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: .6rem;
+            animation: pulse 3s ease-in-out infinite
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.08)
+            }
+        }
+
+        header h1 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00d4aa, #00b4d8, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        header .sub {
+            color: #6a6a8a;
+            font-size: .82rem;
+            margin-top: .4rem
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 370px 1fr;
+            gap: 2rem;
+            align-items: start;
+            margin-top: 1rem
+        }
+
+        @media(max-width:860px) {
+            .main-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .card {
+            background: rgba(18, 18, 40, .75);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 20px;
+            padding: 1.8rem;
+            transition: transform .3s, box-shadow .3s
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .4)
+        }
+
+        .ct {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem
+        }
+
+        .form-group {
+            margin-bottom: 1rem
+        }
+
+        .form-group label {
+            display: block;
+            font-size: .75rem;
+            font-weight: 600;
+            color: #8888aa;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            margin-bottom: .35rem
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: .68rem 1rem;
+            background: rgba(10, 10, 26, .9);
+            border: 1.5px solid rgba(255, 255, 255, .08);
+            border-radius: 12px;
+            color: #e0e0f0;
+            font-family: 'Inter', sans-serif;
+            font-size: .93rem;
+            font-weight: 500;
+            transition: border-color .3s, box-shadow .3s;
+            appearance: none
+        }
+
+        .form-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238888aa' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #00d4aa;
+            box-shadow: 0 0 0 3px rgba(0, 212, 170, .12)
+        }
+
+        .form-group .u {
+            font-size: .72rem;
+            color: #6a6a8a;
+            margin-top: .2rem
+        }
+
+        .btn-d {
+            width: 100%;
+            padding: .85rem;
+            margin-top: .7rem;
+            background: linear-gradient(135deg, #00d4aa, #00b4d8);
+            border: none;
+            border-radius: 14px;
+            color: #050510;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .25s, box-shadow .25s
+        }
+
+        .btn-d:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0, 212, 170, .35)
+        }
+
+        .imt-p {
+            margin-top: .8rem;
+            padding: .7rem;
+            background: rgba(0, 212, 170, .06);
+            border: 1px solid rgba(0, 212, 170, .15);
+            border-radius: 12px;
+            text-align: center
+        }
+
+        .imt-p .lb {
+            font-size: .7rem;
+            color: #00d4aa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600
+        }
+
+        .imt-p .vl {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #00d4aa;
+            margin-top: .1rem
+        }
+
         /* RESULT */
-        @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-        .result-card{animation:fadeUp .5s ease-out both}
-        .mg{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;margin-bottom:1.3rem}
-        .mb{background:rgba(10,10,25,.6);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:.9rem;text-align:center}
-        .mb .ml{font-size:.65rem;font-weight:600;color:#6a6a8a;text-transform:uppercase;letter-spacing:.8px}
-        .mb .mv{font-size:1.4rem;font-weight:800;margin-top:.2rem;color:#fff}
-        .mb .ms{font-size:.73rem;font-weight:500;margin-top:.1rem}
-        .gw{display:flex;justify-content:center;margin:1rem 0 1.3rem}
-        .ga{position:relative;width:160px;height:160px}
-        .ga svg{transform:rotate(-90deg)}
-        .ga-bg{fill:none;stroke:rgba(255,255,255,.06);stroke-width:12}
-        .ga-fl{fill:none;stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.22,.68,0,1.2)}
-        .gc{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
-        .gc .gv{font-size:1.9rem;font-weight:800}
-        .gc .gl{font-size:.6rem;color:#6a6a8a;text-transform:uppercase;letter-spacing:1px}
-        .db{border-radius:14px;padding:1.1rem 1.3rem;margin-bottom:1.1rem;border-left:4px solid}
-        .db.l-rendah{background:rgba(102,187,106,.08);border-color:#66bb6a}
-        .db.l-sedang{background:rgba(255,167,38,.08);border-color:#ffa726}
-        .db.l-tinggi{background:rgba(255,112,67,.08);border-color:#ff7043}
-        .db.l-sangat_tinggi{background:rgba(239,83,80,.08);border-color:#ef5350}
-        .db .dt{font-size:1rem;font-weight:700;color:#fff;margin-bottom:.3rem}
-        .db .ds{font-size:.82rem;color:#a0a0b8;line-height:1.6}
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .result-card {
+            animation: fadeUp .5s ease-out both
+        }
+
+        .mg {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: .7rem;
+            margin-bottom: 1.3rem
+        }
+
+        .mb {
+            background: rgba(10, 10, 25, .6);
+            border: 1px solid rgba(255, 255, 255, .05);
+            border-radius: 14px;
+            padding: .9rem;
+            text-align: center
+        }
+
+        .mb .ml {
+            font-size: .65rem;
+            font-weight: 600;
+            color: #6a6a8a;
+            text-transform: uppercase;
+            letter-spacing: .8px
+        }
+
+        .mb .mv {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-top: .2rem;
+            color: #fff
+        }
+
+        .mb .ms {
+            font-size: .73rem;
+            font-weight: 500;
+            margin-top: .1rem
+        }
+
+        .gw {
+            display: flex;
+            justify-content: center;
+            margin: 1rem 0 1.3rem
+        }
+
+        .ga {
+            position: relative;
+            width: 160px;
+            height: 160px
+        }
+
+        .ga svg {
+            transform: rotate(-90deg)
+        }
+
+        .ga-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, .06);
+            stroke-width: 12
+        }
+
+        .ga-fl {
+            fill: none;
+            stroke-width: 12;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1.2s cubic-bezier(.22, .68, 0, 1.2)
+        }
+
+        .gc {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center
+        }
+
+        .gc .gv {
+            font-size: 1.9rem;
+            font-weight: 800
+        }
+
+        .gc .gl {
+            font-size: .6rem;
+            color: #6a6a8a;
+            text-transform: uppercase;
+            letter-spacing: 1px
+        }
+
+        .db {
+            border-radius: 14px;
+            padding: 1.1rem 1.3rem;
+            margin-bottom: 1.1rem;
+            border-left: 4px solid
+        }
+
+        .db.l-rendah {
+            background: rgba(102, 187, 106, .08);
+            border-color: #66bb6a
+        }
+
+        .db.l-sedang {
+            background: rgba(255, 167, 38, .08);
+            border-color: #ffa726
+        }
+
+        .db.l-tinggi {
+            background: rgba(255, 112, 67, .08);
+            border-color: #ff7043
+        }
+
+        .db.l-sangat_tinggi {
+            background: rgba(239, 83, 80, .08);
+            border-color: #ef5350
+        }
+
+        .db .dt {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: .3rem
+        }
+
+        .db .ds {
+            font-size: .82rem;
+            color: #a0a0b8;
+            line-height: 1.6
+        }
+
         /* CALC */
-        .btn-calc{width:100%;padding:.7rem;margin-top:1rem;background:rgba(79,70,229,.12);border:1.5px solid rgba(79,70,229,.25);border-radius:12px;color:#a78bfa;font-family:'Inter',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .3s}
-        .btn-calc:hover{background:rgba(79,70,229,.22);border-color:#a78bfa}
-        .calc{display:none;margin-top:1.2rem;animation:fadeUp .4s ease-out}
-        .calc.show{display:block}
-        .sc{background:rgba(10,10,28,.7);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:1.2rem 1.3rem;margin-bottom:1rem}
-        .sh{display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem}
-        .sn{width:28px;height:28px;background:linear-gradient(135deg,#4f46e5,#a78bfa);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:#fff;flex-shrink:0}
-        .st{font-size:.88rem;font-weight:700;color:#e0e0f0}
-        .sd{font-size:.76rem;color:#7a7a9a;margin-bottom:.5rem;font-style:italic}
-        table.ct2{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:.4rem}
-        .ct2 th{text-align:left;padding:.45rem .5rem;color:#8888aa;font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.2)}
-        .ct2 td{padding:.4rem .5rem;border-bottom:1px solid rgba(255,255,255,.03);color:#c0c0d0}
-        .ct2 tr.act{background:rgba(0,212,170,.06)}
-        .ct2 tr.ina{opacity:.35}
-        .fb{background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.12);border-radius:10px;padding:.75rem 1rem;margin-top:.5rem;font-family:'Courier New',monospace;font-size:.8rem;color:#00d4aa;line-height:1.65;overflow-x:auto}
-        .fb2{background:rgba(79,70,229,.08);border:1px solid rgba(79,70,229,.15);border-radius:10px;padding:.75rem 1rem;margin-top:.5rem;font-family:'Courier New',monospace;font-size:.8rem;color:#a78bfa;line-height:1.65;overflow-x:auto}
-        .mu-v{font-weight:700;color:#4fc3f7}
-        .al-v{font-weight:700;color:#ffa726}
-        .rs-v{font-weight:800;color:#00d4aa;font-size:1.1em}
-        .chart-img{width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.04);margin-top:.5rem;transition:transform .3s}
-        .chart-img:hover{transform:scale(1.02)}
-        .cg2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
-        @media(max-width:700px){.cg2{grid-template-columns:1fr}.mg{grid-template-columns:1fr}}
-        .mf-piece{background:rgba(10,10,30,.5);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:.6rem .8rem;margin-bottom:.5rem}
-        .mf-piece h4{font-size:.8rem;font-weight:700;color:#4fc3f7;margin-bottom:.3rem}
-        .mf-row{font-size:.75rem;color:#a0a0b8;padding:.15rem 0;font-family:'Courier New',monospace}
-        .info-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:400px;gap:1.5rem}
-        .info-card .bi{font-size:4rem;opacity:.3}
-        .info-card p{color:#5a5a7a;font-size:.92rem;max-width:340px;line-height:1.7}
-        footer{text-align:center;padding:2rem 0 1.2rem;font-size:.72rem;color:#44445a}
-        
-        .top-nav { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; }
-        .top-nav a { color: #8888aa; text-decoration: none; font-weight: 600; font-size: 0.95rem; padding: 0.7rem 1.5rem; border-radius: 12px; transition: all 0.3s; background: rgba(255,255,255,0.03); border: 1px solid transparent; }
-        .top-nav a:hover { color: #fff; background: rgba(255,255,255,0.08); }
-        .top-nav a.active { color: #00d4aa; background: rgba(0, 212, 170, 0.1); border-color: rgba(0, 212, 170, 0.25); box-shadow: 0 4px 15px rgba(0,212,170,0.15); }
+        .btn-calc {
+            width: 100%;
+            padding: .7rem;
+            margin-top: 1rem;
+            background: rgba(79, 70, 229, .12);
+            border: 1.5px solid rgba(79, 70, 229, .25);
+            border-radius: 12px;
+            color: #a78bfa;
+            font-family: 'Inter', sans-serif;
+            font-size: .88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .3s
+        }
+
+        .btn-calc:hover {
+            background: rgba(79, 70, 229, .22);
+            border-color: #a78bfa
+        }
+
+        .calc {
+            display: none;
+            margin-top: 1.2rem;
+            animation: fadeUp .4s ease-out
+        }
+
+        .calc.show {
+            display: block
+        }
+
+        .sc {
+            background: rgba(10, 10, 28, .7);
+            border: 1px solid rgba(255, 255, 255, .05);
+            border-radius: 14px;
+            padding: 1.2rem 1.3rem;
+            margin-bottom: 1rem
+        }
+
+        .sh {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin-bottom: .7rem
+        }
+
+        .sn {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #4f46e5, #a78bfa);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .72rem;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0
+        }
+
+        .st {
+            font-size: .88rem;
+            font-weight: 700;
+            color: #e0e0f0
+        }
+
+        .sd {
+            font-size: .76rem;
+            color: #7a7a9a;
+            margin-bottom: .5rem;
+            font-style: italic
+        }
+
+        table.ct2 {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .78rem;
+            margin-top: .4rem
+        }
+
+        .ct2 th {
+            text-align: left;
+            padding: .45rem .5rem;
+            color: #8888aa;
+            font-weight: 600;
+            font-size: .7rem;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            background: rgba(0, 0, 0, .2)
+        }
+
+        .ct2 td {
+            padding: .4rem .5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, .03);
+            color: #c0c0d0
+        }
+
+        .ct2 tr.act {
+            background: rgba(0, 212, 170, .06)
+        }
+
+        .ct2 tr.ina {
+            opacity: .35
+        }
+
+        .fb {
+            background: rgba(0, 212, 170, .06);
+            border: 1px solid rgba(0, 212, 170, .12);
+            border-radius: 10px;
+            padding: .75rem 1rem;
+            margin-top: .5rem;
+            font-family: 'Courier New', monospace;
+            font-size: .8rem;
+            color: #00d4aa;
+            line-height: 1.65;
+            overflow-x: auto
+        }
+
+        .fb2 {
+            background: rgba(79, 70, 229, .08);
+            border: 1px solid rgba(79, 70, 229, .15);
+            border-radius: 10px;
+            padding: .75rem 1rem;
+            margin-top: .5rem;
+            font-family: 'Courier New', monospace;
+            font-size: .8rem;
+            color: #a78bfa;
+            line-height: 1.65;
+            overflow-x: auto
+        }
+
+        .mu-v {
+            font-weight: 700;
+            color: #4fc3f7
+        }
+
+        .al-v {
+            font-weight: 700;
+            color: #ffa726
+        }
+
+        .rs-v {
+            font-weight: 800;
+            color: #00d4aa;
+            font-size: 1.1em
+        }
+
+        .chart-img {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .04);
+            margin-top: .5rem;
+            transition: transform .3s
+        }
+
+        .chart-img:hover {
+            transform: scale(1.02)
+        }
+
+        .cg2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .7rem
+        }
+
+        @media(max-width:700px) {
+            .cg2 {
+                grid-template-columns: 1fr
+            }
+
+            .mg {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .mf-piece {
+            background: rgba(10, 10, 30, .5);
+            border: 1px solid rgba(255, 255, 255, .04);
+            border-radius: 10px;
+            padding: .6rem .8rem;
+            margin-bottom: .5rem
+        }
+
+        .mf-piece h4 {
+            font-size: .8rem;
+            font-weight: 700;
+            color: #4fc3f7;
+            margin-bottom: .3rem
+        }
+
+        .mf-row {
+            font-size: .75rem;
+            color: #a0a0b8;
+            padding: .15rem 0;
+            font-family: 'Courier New', monospace
+        }
+
+        .info-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 400px;
+            gap: 1.5rem
+        }
+
+        .info-card .bi {
+            font-size: 4rem;
+            opacity: .3
+        }
+
+        .info-card p {
+            color: #5a5a7a;
+            font-size: .92rem;
+            max-width: 340px;
+            line-height: 1.7
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0 1.2rem;
+            font-size: .72rem;
+            color: #44445a
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            flex-wrap: wrap;
+        }
+
+        .top-nav a {
+            color: #8888aa;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.7rem 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+        }
+
+        .top-nav a:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .top-nav a.active {
+            color: #00d4aa;
+            background: rgba(0, 212, 170, 0.1);
+            border-color: rgba(0, 212, 170, 0.25);
+            box-shadow: 0 4px 15px rgba(0, 212, 170, 0.15);
+        }
     </style>
 </head>
+
 <body>
-<div class="container">
-    <header>
-        <span class="hi">⚕️</span>
-        <h1>Sistem Pakar Obesitas Dewasa</h1>
-        <p class="sub">Metode Fuzzy Mamdani · 5 Rules Dasar IMT · PNPK Kemenkes RI 2025</p>
-    </header>
+    <div class="container">
+        <header>
+            <span class="hi">⚕️</span>
+            <h1>Sistem Pakar Obesitas Dewasa</h1>
+            <p class="sub">Metode Fuzzy Mamdani · PNPK Kemenkes RI 2025</p>
+        </header>
 
-    <nav class="top-nav">
-        <a href="/" class="{% if page == 'home' %}active{% endif %}">🏠 Home</a>
-        <a href="/demo" class="{% if page == 'demo' %}active{% endif %}">💻 Demo Sistem</a>
-        <a href="/upload" class="{% if page == 'upload' %}active{% endif %}">📂 Upload File</a>
-    </nav>
+        <nav class="top-nav">
+            <a href="/" class="{% if page == 'home' %}active{% endif %}">🏠 Home</a>
+            <a href="/demo" class="{% if page == 'demo' %}active{% endif %}">💻 Demo Sistem</a>
+            <a href="/upload" class="{% if page == 'upload' %}active{% endif %}">📂 Upload File</a>
+        </nav>
 
-    {% if page == 'home' %}
-    <div class="card" style="max-width: 800px; margin: 0 auto; line-height: 1.8;">
-        <h2 style="color: #00d4aa; margin-bottom: 1.2rem; font-weight: 800; text-align: center;">Tentang Sistem Pakar</h2>
-        <p style="color: #c0c0d0; margin-bottom: 1rem; font-size: 1.05rem;">Sistem ini dirancang menggunakan metode logika <strong>Fuzzy Mamdani</strong> untuk melakukan deteksi tingkat risiko obesitas berdasarkan dataset secara otomatis dan akurat.</p>
-        <p style="color: #c0c0d0; margin-bottom: 1rem; font-size: 1.05rem;">Sistem bekerja dengan memanfaatkan 4 variabel input dasar yaitu <strong>Usia</strong>, <strong>Jenis Kelamin</strong>, <strong>Tinggi Badan</strong>, dan <strong>Berat Badan</strong>. Sistem akan mengevaluasi kombinasi variabel ini menggunakan 30 <em>rules</em> Fuzzy (dibedakan untuk Laki-laki dan Perempuan) untuk menentukan tingkat risiko obesitas tanpa mengandalkan perhitungan IMT eksplisit.</p>
-        <div style="background: rgba(0, 212, 170, 0.08); border-left: 4px solid #00d4aa; padding: 1.2rem; border-radius: 8px; margin-top: 1.5rem;">
-            <strong style="color: #fff;">Petunjuk Penggunaan:</strong>
-            <ul style="color: #a0a0b8; margin-top: 0.8rem; margin-left: 1.5rem; line-height: 1.6;">
-                <li>Gunakan menu <strong>Demo Sistem</strong> untuk menguji diagnosis satu pasien secara manual dan melihat tahapan rincian perhitungan matematis Fuzzy secara transparan.</li>
-                <li>Gunakan menu <strong>Upload File</strong> untuk memproses dataset (file CSV) dalam jumlah masif secara otomatis. Sistem akan melampirkan hasil prediksi akhir ke dalam dataset tersebut.</li>
-            </ul>
+        {% if page == 'home' %}
+        <div class="card" style="max-width: 800px; margin: 0 auto; line-height: 1.8;">
+            <h2 style="color: #00d4aa; margin-bottom: 1.2rem; font-weight: 800; text-align: center;">Tentang Sistem
+                Pakar</h2>
+            <p style="color: #c0c0d0; margin-bottom: 1rem; font-size: 1.05rem;">Sistem ini dirancang menggunakan metode
+                logika <strong>Fuzzy Mamdani</strong> untuk melakukan deteksi tingkat risiko obesitas berdasarkan
+                dataset secara otomatis dan akurat.</p>
+            <p style="color: #c0c0d0; margin-bottom: 1rem; font-size: 1.05rem;">Sistem bekerja dengan memanfaatkan 4
+                variabel input dasar yaitu <strong>Usia</strong>, <strong>Jenis Kelamin</strong>, <strong>Tinggi
+                    Badan</strong>, dan <strong>Berat Badan</strong>. Sistem akan mengevaluasi kombinasi variabel ini
+                menggunakan 30 <em>rules</em> Fuzzy (dibedakan untuk Laki-laki dan Perempuan) untuk menentukan tingkat
+                risiko obesitas tanpa mengandalkan perhitungan IMT eksplisit.</p>
+            <div
+                style="background: rgba(0, 212, 170, 0.08); border-left: 4px solid #00d4aa; padding: 1.2rem; border-radius: 8px; margin-top: 1.5rem;">
+                <strong style="color: #fff;">Petunjuk Penggunaan:</strong>
+                <ul style="color: #a0a0b8; margin-top: 0.8rem; margin-left: 1.5rem; line-height: 1.6;">
+                    <li>Gunakan menu <strong>Demo Sistem</strong> untuk menguji diagnosis satu pasien secara manual dan
+                        melihat tahapan rincian perhitungan matematis Fuzzy secara transparan.</li>
+                    <li>Gunakan menu <strong>Upload File</strong> untuk memproses dataset (file CSV) dalam jumlah masif
+                        secara otomatis. Sistem akan melampirkan hasil prediksi akhir ke dalam dataset tersebut.</li>
+                </ul>
+            </div>
         </div>
-    </div>
-    
-    {% elif page == 'upload' %}
-    <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
-        <div class="ct" style="justify-content: center; margin-bottom: 1.5rem; font-size: 1.3rem;">📂 Upload Dataset CSV</div>
-        <p style="color: #a0a0b8; margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.6;">Unggah file <code>.csv</code> yang berisi dataset pasien. Dataset diwajibkan memiliki kolom <strong>Weight</strong> dan <strong>Height</strong>, atau kolom <strong>BMI</strong>.<br><br>Sistem akan secara otomatis membaca dan melabeli kolom <strong>Output</strong> dan <strong>Skor_Risiko</strong> untuk setiap baris data hingga baris terakhir menggunakan otak Fuzzy System.</p>
-        <form method="POST" action="/process_upload" enctype="multipart/form-data">
-            <input type="file" name="file" accept=".csv" required style="margin-bottom: 2rem; padding: 1.5rem 1rem; background: rgba(10,10,26,0.9); border: 1.5px dashed rgba(255,255,255,0.2); border-radius: 12px; width: 100%; color: #fff; cursor: pointer; text-align: center;">
-            <button type="submit" class="btn-d" style="font-size: 1.1rem; padding: 1rem;">🚀 Proses Data (Auto-Fuzzy)</button>
-        </form>
-    </div>
 
-    {% else %}
-    <div class="main-grid">
-        <!-- FORM -->
-        <div class="card">
-            <div class="ct">📋 Data Pasien</div>
-            <form method="POST" action="/diagnosa">
-                <div class="form-group">
-                    <label for="um">Usia (Umur)</label>
-                    <input type="number" name="umur" id="um" value="{{ result.umur if result else 30 }}" step="1" min="10" max="120" required>
-                    <div class="u">satuan: tahun</div>
-                </div>
-                <div class="form-group">
-                    <label for="jk">Jenis Kelamin</label>
-                    <select name="jenis_kelamin" id="jk">
-                        <option value="Male" {% if result and (result.jk=='Male' or result.jk=='Laki-laki') %}selected{% endif %}>Laki-laki</option>
-                        <option value="Female" {% if result and (result.jk=='Female' or result.jk=='Perempuan') %}selected{% endif %}>Perempuan</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="bb">Berat Badan</label>
-                    <input type="number" name="berat_badan" id="bb" value="{{ result.bb if result else 70 }}" step="0.5" min="5" max="150" required>
-                    <div class="u">satuan: kg</div>
-                </div>
-                <div class="form-group">
-                    <label for="tb">Tinggi Badan</label>
-                    <input type="number" name="tinggi_badan" id="tb" value="{{ result.tb if result else 170 }}" step="0.5" min="100" max="220" required>
-                    <div class="u">satuan: cm</div>
-                </div>
-
-                <div class="imt-p">
-                    <div class="lb">IMT Anda (Info)</div>
-                    <div class="vl" id="imtP">—</div>
-                </div>
-                <button type="submit" class="btn-d">🔍 Diagnosa</button>
+        {% elif page == 'upload' %}
+        <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+            <div class="ct" style="justify-content: center; margin-bottom: 1.5rem; font-size: 1.3rem;">📂 Upload Dataset
+                CSV</div>
+            <p style="color: #a0a0b8; margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.6;">Unggah file
+                <code>.csv</code> yang berisi dataset pasien. Dataset diwajibkan memiliki kolom <strong>Weight</strong>
+                dan <strong>Height</strong>, atau kolom <strong>BMI</strong>.<br><br>Sistem akan secara otomatis membaca
+                dan melabeli kolom <strong>Output</strong> dan <strong>Skor_Risiko</strong> untuk setiap baris data
+                hingga baris terakhir menggunakan otak Fuzzy System.</p>
+            <form method="POST" action="/process_upload" enctype="multipart/form-data">
+                <input type="file" name="file" accept=".csv" required
+                    style="margin-bottom: 2rem; padding: 1.5rem 1rem; background: rgba(10,10,26,0.9); border: 1.5px dashed rgba(255,255,255,0.2); border-radius: 12px; width: 100%; color: #fff; cursor: pointer; text-align: center;">
+                <button type="submit" class="btn-d" style="font-size: 1.1rem; padding: 1rem;">🚀 Proses Data
+                    (Auto-Fuzzy)</button>
             </form>
         </div>
 
-        <!-- RIGHT -->
-        {% if result %}
-        <div class="card result-card">
-            <div class="ct">📊 Hasil Diagnosis</div>
-
-            <div class="mg">
-                <div class="mb">
-                    <div class="ml">IMT</div>
-                    <div class="mv">{{ result.imt_val }}</div>
-                    <div class="ms">{% if result.klas=='Normal' %}<span style="color:#66bb6a">{{ result.klas }}</span>{% elif result.klas=='BB Lebih' %}<span style="color:#ffa726">{{ result.klas }}</span>{% elif result.klas=='Obesitas I' %}<span style="color:#ff7043">{{ result.klas }}</span>{% elif result.klas=='Obesitas II' %}<span style="color:#ef5350">{{ result.klas }}</span>{% else %}<span style="color:#4fc3f7">{{ result.klas }}</span>{% endif %}</div>
-                </div>
-
-                <div class="mb">
-                    <div class="ml">Skor Risiko</div>
-                    <div class="mv">{{ result.hasil }}</div>
-                    <div class="ms">{% if result.level=='rendah' %}<span style="color:#66bb6a">/ 100</span>{% elif result.level=='sedang' %}<span style="color:#ffa726">/ 100</span>{% elif result.level=='tinggi' %}<span style="color:#ff7043">/ 100</span>{% else %}<span style="color:#ef5350">/ 100</span>{% endif %}</div>
-                </div>
-            </div>
-
-            {% set circ=282.74 %}{% set off=circ-(circ*result.hasil/100) %}
-            {% if result.level=='rendah' %}{% set gc='#66bb6a' %}{% elif result.level=='sedang' %}{% set gc='#ffa726' %}{% elif result.level=='tinggi' %}{% set gc='#ff7043' %}{% else %}{% set gc='#ef5350' %}{% endif %}
-            <div class="gw"><div class="ga">
-                <svg viewBox="0 0 120 120" width="160" height="160">
-                    <circle class="ga-bg" cx="60" cy="60" r="45"/>
-                    <circle class="ga-fl" cx="60" cy="60" r="45" stroke="{{gc}}" stroke-dasharray="{{circ}}" stroke-dashoffset="{{off}}"/>
-                </svg>
-                <div class="gc">
-                    {% if result.level=='rendah' %}<div class="gv" style="color:#66bb6a">{{result.hasil}}</div>{% elif result.level=='sedang' %}<div class="gv" style="color:#ffa726">{{result.hasil}}</div>{% elif result.level=='tinggi' %}<div class="gv" style="color:#ff7043">{{result.hasil}}</div>{% else %}<div class="gv" style="color:#ef5350">{{result.hasil}}</div>{% endif %}
-                    <div class="gl">Skor Risiko</div>
-                </div>
-            </div></div>
-
-            <div class="db l-{{result.level}}">
-                <div class="dt">📋 {{result.diag}}</div>
-                <div class="ds">💡 {{result.saran}}</div>
-            </div>
-
-            <!-- TOMBOL PERHITUNGAN -->
-            <button class="btn-calc" id="btnC" onclick="toggleC()">📐 Lihat Perhitungan Manual Mamdani (Lengkap)</button>
-
-            <div class="calc" id="calcP">
-
-            <!-- ======= STEP 0: FUNGSI KEANGGOTAAN ======= -->
-            <div class="sc">
-                <div class="sh"><div class="sn">0</div><div class="st">Penentuan Fungsi Keanggotaan</div></div>
-                <div class="sd">Menentukan fungsi keanggotaan (membership function) beserta rumus piecewise-nya.</div>
-
-                <div class="cg2" style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.7rem;">
-                    <div>
-                        <img class="chart-img" src="data:image/png;base64,{{result.charts.age}}" alt="MF Age">
+        {% else %}
+        <div class="main-grid">
+            <!-- FORM -->
+            <div class="card">
+                <div class="ct">📋 Data Pasien</div>
+                <form method="POST" action="/diagnosa">
+                    <div class="form-group">
+                        <label for="um">Usia (Umur)</label>
+                        <input type="number" name="umur" id="um" value="{{ result.umur if result else 30 }}" step="1"
+                            min="10" max="120" required>
+                        <div class="u">satuan: tahun</div>
                     </div>
-                    <div>
-                        <img class="chart-img" src="data:image/png;base64,{{result.charts.imt}}" alt="MF IMT">
+                    <div class="form-group">
+                        <label for="jk">Jenis Kelamin</label>
+                        <select name="jenis_kelamin" id="jk">
+                            <option value="Male" {% if result and (result.jk=='Male' or result.jk=='Laki-laki' )
+                                %}selected{% endif %}>Laki-laki</option>
+                            <option value="Female" {% if result and (result.jk=='Female' or result.jk=='Perempuan' )
+                                %}selected{% endif %}>Perempuan</option>
+                        </select>
                     </div>
-                    <div>
-                        <img class="chart-img" src="data:image/png;base64,{{result.charts.risiko}}" alt="MF Risiko">
+                    <div class="form-group">
+                        <label for="bb">Berat Badan</label>
+                        <input type="number" name="berat_badan" id="bb" value="{{ result.bb if result else 70 }}"
+                            step="0.5" min="5" max="150" required>
+                        <div class="u">satuan: kg</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="tb">Tinggi Badan</label>
+                        <input type="number" name="tinggi_badan" id="tb" value="{{ result.tb if result else 170 }}"
+                            step="0.5" min="100" max="220" required>
+                        <div class="u">satuan: cm</div>
+                    </div>
+
+                    <div class="imt-p">
+                        <div class="lb">IMT Anda (Info)</div>
+                        <div class="vl" id="imtP">—</div>
+                    </div>
+                    <button type="submit" class="btn-d">🔍 Diagnosa</button>
+                </form>
+            </div>
+
+            <!-- RIGHT -->
+            {% if result %}
+            <div class="card result-card">
+                <div class="ct">📊 Hasil Diagnosis</div>
+
+                <div class="mg">
+                    <div class="mb">
+                        <div class="ml">IMT</div>
+                        <div class="mv">{{ result.imt_val }}</div>
+                        <div class="ms">{% if result.klas=='Normal' %}<span style="color:#66bb6a">{{ result.klas
+                                }}</span>{% elif result.klas=='BB Lebih' %}<span style="color:#ffa726">{{ result.klas
+                                }}</span>{% elif result.klas=='Obesitas I' %}<span style="color:#ff7043">{{ result.klas
+                                }}</span>{% elif result.klas=='Obesitas II' %}<span style="color:#ef5350">{{ result.klas
+                                }}</span>{% else %}<span style="color:#4fc3f7">{{ result.klas }}</span>{% endif %}</div>
+                    </div>
+
+                    <div class="mb">
+                        <div class="ml">Skor Risiko</div>
+                        <div class="mv">{{ result.hasil }}</div>
+                        <div class="ms">{% if result.level=='rendah' %}<span style="color:#66bb6a">/ 100</span>{% elif
+                            result.level=='sedang' %}<span style="color:#ffa726">/ 100</span>{% elif
+                            result.level=='tinggi' %}<span style="color:#ff7043">/ 100</span>{% else %}<span
+                                style="color:#ef5350">/ 100</span>{% endif %}</div>
                     </div>
                 </div>
 
-                <p style="font-size:.82rem;color:#a0a0b8;margin:.8rem 0 .3rem;font-weight:600">Rumus Piecewise (Contoh Usia):</p>
-                {% for name, formulas in result.steps.mf_formulas.age.items() %}
-                <div class="mf-piece">
-                    <h4>μ<sub>{{name}}</sub>(x)</h4>
-                    {% for f in formulas %}
-                    <div class="mf-row">{{ f.expr }}, &nbsp; {{ f.cond }}</div>
-                    {% endfor %}
-                </div>
-                {% endfor %}
-            </div>
-
-            <!-- ======= STEP 1: FUZZIFIKASI ======= -->
-            <div class="sc">
-                <div class="sh"><div class="sn">1</div><div class="st">Fuzzifikasi</div></div>
-                <div class="sd">Masukkan nilai input crisp ke fungsi keanggotaan untuk mendapatkan derajat keanggotaan (μ).</div>
-
-                <p style="font-size:.85rem;color:#4fc3f7;font-weight:700;margin-bottom:.4rem">Usia = {{result.umur}} th</p>
-                <div class="fb">
-                {% for name, d in result.steps.fuzzifikasi.age.items() %}
-                    {{d.calc}}<br>
-                {% endfor %}
-                </div>
-
-                <p style="font-size:.85rem;color:#4fc3f7;font-weight:700;margin-top:.8rem;margin-bottom:.4rem">IMT (Tinggi {{result.tb}} cm, Berat {{result.bb}} kg) = {{result.imt_val}}</p>
-                <div class="fb">
-                {% for name, d in result.steps.fuzzifikasi.imt.items() %}
-                    {{d.calc}}<br>
-                {% endfor %}
-                </div>
-
-
-            </div>
-
-            <!-- ======= STEP 2: OPERASI LOGIKA & IMPLIKASI ======= -->
-            <div class="sc">
-                <div class="sh"><div class="sn">2</div><div class="st">Operasi Logika (AND = MIN) & Implikasi (Clipping)</div></div>
-                <div class="sd">Hitung α-predikat setiap rule menggunakan MIN, lalu potong (clip) fungsi keanggotaan output pada nilai α.</div>
-
-                <div class="fb2">
-                {% for r in result.steps.rules %}
-                    <strong>R{{r.no}}:</strong> IF Age <em>{{r.age_label}}</em> AND IMT <em>{{r.imt_label}}</em> THEN Risiko <em>{{r.risk_label}}</em><br>
-                    &nbsp;&nbsp;&nbsp;→ {{r.calc}}
-                    {% if r.active %} <strong style="color:#00d4aa">✓ AKTIF</strong>{% else %} <span style="color:#ef5350">✗ tidak aktif</span>{% endif %}<br><br>
-                {% endfor %}
-                </div>
-            </div>
-
-            <!-- ======= STEP 3: AGREGASI — Per Rule Charts ======= -->
-            <div class="sc">
-                <div class="sh"><div class="sn">3</div><div class="st">Agregasi (Aturan MAX) — Grafik Per Rule</div></div>
-                <div class="sd">Memperlihatkan hasil clipping setiap rule. Rule aktif (✓) menampilkan area yang di-clip pada α, rule tidak aktif (✗) diabaikan.</div>
-
-                <img class="chart-img" src="data:image/png;base64,{{result.charts.rules}}" alt="Per-rule charts">
-
-                <div class="fb" style="margin-top:.8rem">
-                {% for rk, alpha in result.steps.agregasi.items() %}
-                    Risiko <strong>{{rk}}</strong> aktif dengan tinggi potong <strong class="al-v">{{alpha}}</strong><br>
-                {% endfor %}
-                </div>
-            </div>
-
-            <!-- ======= STEP 3b: TITIK POTONG ======= -->
-            {% if result.steps.titik_potong %}
-            <div class="sc">
-                <div class="sh"><div class="sn">3b</div><div class="st">Agregasi — Titik Potong</div></div>
-                <div class="sd">Menghitung titik potong (clip point) pada fungsi keanggotaan output yang di-clip.</div>
-
-                {% for rk, data in result.steps.titik_potong.items() %}
-                <div class="mf-piece">
-                    <h4>{{rk}} (α = {{data.alpha}})</h4>
-                    {% for cp in data.clips %}
-                    <div class="fb2" style="margin-bottom:.4rem">
-                        <strong>{{cp.name}}:</strong><br>
-                        {{cp.formula}}<br>
-                        {{cp.steps}}<br>
-                        <strong class="rs-v">{{cp.result}}</strong>
+                {% set circ=282.74 %}{% set off=circ-(circ*result.hasil/100) %}
+                {% if result.level=='rendah' %}{% set gc='#66bb6a' %}{% elif result.level=='sedang' %}{% set
+                gc='#ffa726' %}{% elif result.level=='tinggi' %}{% set gc='#ff7043' %}{% else %}{% set gc='#ef5350' %}{%
+                endif %}
+                <div class="gw">
+                    <div class="ga">
+                        <svg viewBox="0 0 120 120" width="160" height="160">
+                            <circle class="ga-bg" cx="60" cy="60" r="45" />
+                            <circle class="ga-fl" cx="60" cy="60" r="45" stroke="{{gc}}" stroke-dasharray="{{circ}}"
+                                stroke-dashoffset="{{off}}" />
+                        </svg>
+                        <div class="gc">
+                            {% if result.level=='rendah' %}<div class="gv" style="color:#66bb6a">{{result.hasil}}</div>
+                            {% elif result.level=='sedang' %}<div class="gv" style="color:#ffa726">{{result.hasil}}
+                            </div>{% elif result.level=='tinggi' %}<div class="gv" style="color:#ff7043">
+                                {{result.hasil}}</div>{% else %}<div class="gv" style="color:#ef5350">{{result.hasil}}
+                            </div>{% endif %}
+                            <div class="gl">Skor Risiko</div>
+                        </div>
                     </div>
-                    {% endfor %}
                 </div>
-                {% endfor %}
+
+                <div class="db l-{{result.level}}">
+                    <div class="dt">📋 {{result.diag}}</div>
+                    <div class="ds">💡 {{result.saran}}</div>
+                </div>
+
+                <!-- TOMBOL PERHITUNGAN -->
+                <button class="btn-calc" id="btnC" onclick="toggleC()">📐 Lihat Perhitungan Manual Mamdani
+                    (Lengkap)</button>
+
+                <div class="calc" id="calcP">
+
+                    <!-- ======= STEP 0: FUNGSI KEANGGOTAAN ======= -->
+                    <div class="sc">
+                        <div class="sh">
+                            <div class="sn">0</div>
+                            <div class="st">Penentuan Fungsi Keanggotaan</div>
+                        </div>
+                        <div class="sd">Menentukan fungsi keanggotaan (membership function) beserta rumus piecewise-nya.
+                        </div>
+
+                        <div class="cg2" style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.7rem;">
+                            <div>
+                                <img class="chart-img" src="data:image/png;base64,{{result.charts.age}}" alt="MF Age">
+                            </div>
+                            <div>
+                                <img class="chart-img" src="data:image/png;base64,{{result.charts.imt}}" alt="MF IMT">
+                            </div>
+                            <div>
+                                <img class="chart-img" src="data:image/png;base64,{{result.charts.risiko}}"
+                                    alt="MF Risiko">
+                            </div>
+                        </div>
+
+                        <p style="font-size:.82rem;color:#a0a0b8;margin:.8rem 0 .3rem;font-weight:600">Rumus Piecewise
+                            (Contoh Usia):</p>
+                        {% for name, formulas in result.steps.mf_formulas.age.items() %}
+                        <div class="mf-piece">
+                            <h4>μ<sub>{{name}}</sub>(x)</h4>
+                            {% for f in formulas %}
+                            <div class="mf-row">{{ f.expr }}, &nbsp; {{ f.cond }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- ======= STEP 1: FUZZIFIKASI ======= -->
+                    <div class="sc">
+                        <div class="sh">
+                            <div class="sn">1</div>
+                            <div class="st">Fuzzifikasi</div>
+                        </div>
+                        <div class="sd">Masukkan nilai input crisp ke fungsi keanggotaan untuk mendapatkan derajat
+                            keanggotaan (μ).</div>
+
+                        <p style="font-size:.85rem;color:#4fc3f7;font-weight:700;margin-bottom:.4rem">Usia =
+                            {{result.umur}} th</p>
+                        <div class="fb">
+                            {% for name, d in result.steps.fuzzifikasi.age.items() %}
+                            {{d.calc}}<br>
+                            {% endfor %}
+                        </div>
+
+                        <p style="font-size:.85rem;color:#4fc3f7;font-weight:700;margin-top:.8rem;margin-bottom:.4rem">
+                            IMT (Tinggi {{result.tb}} cm, Berat {{result.bb}} kg) = {{result.imt_val}}</p>
+                        <div class="fb">
+                            {% for name, d in result.steps.fuzzifikasi.imt.items() %}
+                            {{d.calc}}<br>
+                            {% endfor %}
+                        </div>
+
+
+                    </div>
+
+                    <!-- ======= STEP 2: OPERASI LOGIKA & IMPLIKASI ======= -->
+                    <div class="sc">
+                        <div class="sh">
+                            <div class="sn">2</div>
+                            <div class="st">Operasi Logika (AND = MIN) & Implikasi (Clipping)</div>
+                        </div>
+                        <div class="sd">Hitung α-predikat setiap rule menggunakan MIN, lalu potong (clip) fungsi
+                            keanggotaan output pada nilai α.</div>
+
+                        <div class="fb2">
+                            {% for r in result.steps.rules %}
+                            <strong>R{{r.no}}:</strong> IF Age <em>{{r.age_label}}</em> AND IMT <em>{{r.imt_label}}</em>
+                            THEN Risiko <em>{{r.risk_label}}</em><br>
+                            &nbsp;&nbsp;&nbsp;→ {{r.calc}}
+                            {% if r.active %} <strong style="color:#00d4aa">✓ AKTIF</strong>{% else %} <span
+                                style="color:#ef5350">✗ tidak aktif</span>{% endif %}<br><br>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- ======= STEP 3: AGREGASI — Per Rule Charts ======= -->
+                    <div class="sc">
+                        <div class="sh">
+                            <div class="sn">3</div>
+                            <div class="st">Agregasi (Aturan MAX) — Grafik Per Rule</div>
+                        </div>
+                        <div class="sd">Memperlihatkan hasil clipping setiap rule. Rule aktif (✓) menampilkan area yang
+                            di-clip pada α, rule tidak aktif (✗) diabaikan.</div>
+
+                        <img class="chart-img" src="data:image/png;base64,{{result.charts.rules}}"
+                            alt="Per-rule charts">
+
+                        <div class="fb" style="margin-top:.8rem">
+                            {% for rk, alpha in result.steps.agregasi.items() %}
+                            Risiko <strong>{{rk}}</strong> aktif dengan tinggi potong <strong
+                                class="al-v">{{alpha}}</strong><br>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- ======= STEP 3b: TITIK POTONG ======= -->
+                    {% if result.steps.titik_potong %}
+                    <div class="sc">
+                        <div class="sh">
+                            <div class="sn">3b</div>
+                            <div class="st">Agregasi — Titik Potong</div>
+                        </div>
+                        <div class="sd">Menghitung titik potong (clip point) pada fungsi keanggotaan output yang
+                            di-clip.</div>
+
+                        {% for rk, data in result.steps.titik_potong.items() %}
+                        <div class="mf-piece">
+                            <h4>{{rk}} (α = {{data.alpha}})</h4>
+                            {% for cp in data.clips %}
+                            <div class="fb2" style="margin-bottom:.4rem">
+                                <strong>{{cp.name}}:</strong><br>
+                                {{cp.formula}}<br>
+                                {{cp.steps}}<br>
+                                <strong class="rs-v">{{cp.result}}</strong>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- ======= STEP 3c: HIMPUNAN BARU (AGREGASI) ======= -->
+                    <div class="sc">
+                        <div class="sh">
+                            <div class="sn">3c</div>
+                            <div class="st">Agregasi — Fungsi Himpunan Baru</div>
+                        </div>
+                        <div class="sd">Gabungan semua himpunan output yang di-clip menggunakan operasi MAX membentuk
+                            fungsi himpunan baru.</div>
+
+                        <img class="chart-img" src="data:image/png;base64,{{result.charts.agregasi}}" alt="Agregasi">
+                    </div>
+
+                    <!-- ======= STEP 4: DEFUZZIFIKASI ======= -->
+                    <div class="sc">
+                        <div class="sh">
+                            <div class="sn">4</div>
+                            <div class="st">Defuzzifikasi (Centroid)</div>
+                        </div>
+                        <div class="sd">Mengubah himpunan fuzzy gabungan menjadi nilai tegas (crisp) menggunakan metode
+                            centroid (titik pusat massa).</div>
+
+                        <div class="fb" style="margin-bottom:.8rem">
+                            <strong>Rumus Centroid:</strong><br>
+                            Z* = ∫ z · μ(z) dz &nbsp;/&nbsp; ∫ μ(z) dz<br>
+                            Z* = ΣM / ΣA
+                        </div>
+
+                        <!-- MOMEN -->
+                        <p style="font-size:.85rem;color:#4fc3f7;font-weight:700;margin-bottom:.3rem">Menghitung Momen
+                            (M):</p>
+                        <table class="ct2">
+                            <thead>
+                                <tr>
+                                    <th>Segmen</th>
+                                    <th>Interval</th>
+                                    <th>Mᵢ = ∫z·μ(z)dz</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for seg in result.steps.segments %}
+                                <tr class="act">
+                                    <td><strong>M{{loop.index}}</strong></td>
+                                    <td>[{{seg.z_start}} , {{seg.z_end}}]</td>
+                                    <td class="mu-v">{{seg.momen}}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr style="border-top:2px solid rgba(255,255,255,.1)">
+                                    <td colspan="2"><strong>ΣM (Total Momen)</strong></td>
+                                    <td class="al-v"><strong>{{result.steps.defuzz.total_momen}}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- LUAS -->
+                        <p style="font-size:.85rem;color:#4fc3f7;font-weight:700;margin:.8rem 0 .3rem">Menghitung Luas
+                            (A):</p>
+                        <table class="ct2">
+                            <thead>
+                                <tr>
+                                    <th>Segmen</th>
+                                    <th>Interval</th>
+                                    <th>Aᵢ = ∫μ(z)dz</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for seg in result.steps.segments %}
+                                <tr class="act">
+                                    <td><strong>A{{loop.index}}</strong></td>
+                                    <td>[{{seg.z_start}} , {{seg.z_end}}]</td>
+                                    <td class="mu-v">{{seg.luas}}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr style="border-top:2px solid rgba(255,255,255,.1)">
+                                    <td colspan="2"><strong>ΣA (Total Luas)</strong></td>
+                                    <td class="al-v"><strong>{{result.steps.defuzz.total_luas}}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- OUTPUT CRISP -->
+                        <p style="font-size:.85rem;color:#4fc3f7;font-weight:700;margin:.8rem 0 .3rem">Menghitung Output
+                            Crisp (Z*):</p>
+                        <div class="fb">
+                            Z* = ΣM / ΣA<br>
+                            Z* = {{result.steps.defuzz.total_momen}} / {{result.steps.defuzz.total_luas}}<br>
+                            <span class="rs-v">Z* = {{result.steps.defuzz.crisp}}</span>
+                        </div>
+
+                        <div
+                            style="margin-top:1rem;padding:1rem;background:rgba(0,212,170,.08);border-radius:14px;text-align:center">
+                            <div style="font-size:.7rem;color:#6a6a8a;text-transform:uppercase;letter-spacing:1px">
+                                Output Crisp (Skor Risiko Obesitas)</div>
+                            <div style="font-size:2.2rem;font-weight:800;color:#00d4aa;margin:.3rem 0">
+                                {{result.steps.defuzz.crisp}}</div>
+                        </div>
+                    </div>
+
+                    <!-- ======= KESIMPULAN ======= -->
+                    <div class="sc" style="border:1.5px solid rgba(0,212,170,.2)">
+                        <div class="sh">
+                            <div class="sn" style="background:linear-gradient(135deg,#00d4aa,#00b4d8)">✓</div>
+                            <div class="st">Kesimpulan</div>
+                        </div>
+                        <div class="fb" style="font-size:.85rem;line-height:1.8">
+                            <strong>Input:</strong><br>
+                            • Usia: <strong>{{result.umur}} tahun</strong><br>
+                            • Jenis Kelamin: <strong>{{result.jk}}</strong><br>
+                            • Berat Badan: <strong>{{result.bb}} kg</strong><br>
+                            • Tinggi Badan: <strong>{{result.tb}} cm</strong><br>
+                            • (Info IMT: <strong>{{result.imt_val}} kg/m²</strong>)<br><br>
+                            <strong>Proses Fuzzy Mamdani:</strong><br>
+                            • Metode: Fuzzy Mamdani (30 Rules Dataset)<br>
+                            • Prediksi Kategori: <strong style="color:#ff7043">{{result.klas}}</strong><br>
+                            • Defuzzifikasi: Centroid<br>
+                            • Skor Risiko: <strong class="rs-v">{{result.steps.defuzz.crisp}} / 100</strong><br><br>
+                            <strong>Hasil Diagnosis:</strong><br>
+                            <span class="rs-v" style="font-size:1.1rem">→ {{result.diag}}</span><br>
+                            💡 {{result.saran}}
+                        </div>
+                    </div>
+
+                </div><!-- /calc -->
+            </div>
+
+            {% else %}
+            <div class="card info-card">
+                <div class="bi">🩺</div>
+                <p>Masukkan data pasien di sebelah kiri, lalu tekan <strong>Diagnosa</strong> untuk melihat hasil
+                    analisis Fuzzy Mamdani.</p>
             </div>
             {% endif %}
-
-            <!-- ======= STEP 3c: HIMPUNAN BARU (AGREGASI) ======= -->
-            <div class="sc">
-                <div class="sh"><div class="sn">3c</div><div class="st">Agregasi — Fungsi Himpunan Baru</div></div>
-                <div class="sd">Gabungan semua himpunan output yang di-clip menggunakan operasi MAX membentuk fungsi himpunan baru.</div>
-
-                <img class="chart-img" src="data:image/png;base64,{{result.charts.agregasi}}" alt="Agregasi">
-            </div>
-
-            <!-- ======= STEP 4: DEFUZZIFIKASI ======= -->
-            <div class="sc">
-                <div class="sh"><div class="sn">4</div><div class="st">Defuzzifikasi (Centroid)</div></div>
-                <div class="sd">Mengubah himpunan fuzzy gabungan menjadi nilai tegas (crisp) menggunakan metode centroid (titik pusat massa).</div>
-
-                <div class="fb" style="margin-bottom:.8rem">
-                    <strong>Rumus Centroid:</strong><br>
-                    Z* = ∫ z · μ(z) dz &nbsp;/&nbsp; ∫ μ(z) dz<br>
-                    Z* = ΣM / ΣA
-                </div>
-
-                <!-- MOMEN -->
-                <p style="font-size:.85rem;color:#4fc3f7;font-weight:700;margin-bottom:.3rem">Menghitung Momen (M):</p>
-                <table class="ct2">
-                    <thead><tr><th>Segmen</th><th>Interval</th><th>Mᵢ = ∫z·μ(z)dz</th></tr></thead>
-                    <tbody>
-                    {% for seg in result.steps.segments %}
-                    <tr class="act">
-                        <td><strong>M{{loop.index}}</strong></td>
-                        <td>[{{seg.z_start}} , {{seg.z_end}}]</td>
-                        <td class="mu-v">{{seg.momen}}</td>
-                    </tr>
-                    {% endfor %}
-                    <tr style="border-top:2px solid rgba(255,255,255,.1)">
-                        <td colspan="2"><strong>ΣM (Total Momen)</strong></td>
-                        <td class="al-v"><strong>{{result.steps.defuzz.total_momen}}</strong></td>
-                    </tr>
-                    </tbody>
-                </table>
-
-                <!-- LUAS -->
-                <p style="font-size:.85rem;color:#4fc3f7;font-weight:700;margin:.8rem 0 .3rem">Menghitung Luas (A):</p>
-                <table class="ct2">
-                    <thead><tr><th>Segmen</th><th>Interval</th><th>Aᵢ = ∫μ(z)dz</th></tr></thead>
-                    <tbody>
-                    {% for seg in result.steps.segments %}
-                    <tr class="act">
-                        <td><strong>A{{loop.index}}</strong></td>
-                        <td>[{{seg.z_start}} , {{seg.z_end}}]</td>
-                        <td class="mu-v">{{seg.luas}}</td>
-                    </tr>
-                    {% endfor %}
-                    <tr style="border-top:2px solid rgba(255,255,255,.1)">
-                        <td colspan="2"><strong>ΣA (Total Luas)</strong></td>
-                        <td class="al-v"><strong>{{result.steps.defuzz.total_luas}}</strong></td>
-                    </tr>
-                    </tbody>
-                </table>
-
-                <!-- OUTPUT CRISP -->
-                <p style="font-size:.85rem;color:#4fc3f7;font-weight:700;margin:.8rem 0 .3rem">Menghitung Output Crisp (Z*):</p>
-                <div class="fb">
-                    Z* = ΣM / ΣA<br>
-                    Z* = {{result.steps.defuzz.total_momen}} / {{result.steps.defuzz.total_luas}}<br>
-                    <span class="rs-v">Z* = {{result.steps.defuzz.crisp}}</span>
-                </div>
-
-                <div style="margin-top:1rem;padding:1rem;background:rgba(0,212,170,.08);border-radius:14px;text-align:center">
-                    <div style="font-size:.7rem;color:#6a6a8a;text-transform:uppercase;letter-spacing:1px">Output Crisp (Skor Risiko Obesitas)</div>
-                    <div style="font-size:2.2rem;font-weight:800;color:#00d4aa;margin:.3rem 0">{{result.steps.defuzz.crisp}}</div>
-                </div>
-            </div>
-
-            <!-- ======= KESIMPULAN ======= -->
-            <div class="sc" style="border:1.5px solid rgba(0,212,170,.2)">
-                <div class="sh"><div class="sn" style="background:linear-gradient(135deg,#00d4aa,#00b4d8)">✓</div><div class="st">Kesimpulan</div></div>
-                <div class="fb" style="font-size:.85rem;line-height:1.8">
-                    <strong>Input:</strong><br>
-                    • Usia: <strong>{{result.umur}} tahun</strong><br>
-                    • Jenis Kelamin: <strong>{{result.jk}}</strong><br>
-                    • Berat Badan: <strong>{{result.bb}} kg</strong><br>
-                    • Tinggi Badan: <strong>{{result.tb}} cm</strong><br>
-                    • (Info IMT: <strong>{{result.imt_val}} kg/m²</strong>)<br><br>
-                    <strong>Proses Fuzzy Mamdani:</strong><br>
-                    • Metode: Fuzzy Mamdani (30 Rules Dataset)<br>
-                    • Prediksi Kategori: <strong style="color:#ff7043">{{result.klas}}</strong><br>
-                    • Defuzzifikasi: Centroid<br>
-                    • Skor Risiko: <strong class="rs-v">{{result.steps.defuzz.crisp}} / 100</strong><br><br>
-                    <strong>Hasil Diagnosis:</strong><br>
-                    <span class="rs-v" style="font-size:1.1rem">→ {{result.diag}}</span><br>
-                    💡 {{result.saran}}
-                </div>
-            </div>
-
-            </div><!-- /calc -->
-        </div>
-
-        {% else %}
-        <div class="card info-card">
-            <div class="bi">🩺</div>
-            <p>Masukkan data pasien di sebelah kiri, lalu tekan <strong>Diagnosa</strong> untuk melihat hasil analisis Fuzzy Mamdani.</p>
         </div>
         {% endif %}
     </div>
-    {% endif %}
-</div>
 
-<footer>Sumber: PNPK Kemenkes RI 2025 · Kriteria WHO Asia Pasifik</footer>
+    <footer>Sumber: PNPK Kemenkes RI 2025 · Kriteria WHO Asia Pasifik</footer>
 
-<script>
-function hitungIMT(){
-    const bb=parseFloat(document.getElementById('bb').value)||0;
-    const tb=parseFloat(document.getElementById('tb').value)||0;
-    const el=document.getElementById('imtP');
-    if(bb>0&&tb>0){el.textContent=(bb/Math.pow(tb/100,2)).toFixed(1)+' kg/m²'}else{el.textContent='—'}
-}
-document.getElementById('bb').addEventListener('input',hitungIMT);
-document.getElementById('tb').addEventListener('input',hitungIMT);
-hitungIMT();
-function toggleC(){
-    const p=document.getElementById('calcP');
-    const b=document.getElementById('btnC');
-    p.classList.toggle('show');
-    b.textContent=p.classList.contains('show')?'📐 Sembunyikan Perhitungan':'📐 Lihat Perhitungan Manual Mamdani (Lengkap)';
-    if(p.classList.contains('show'))p.scrollIntoView({behavior:'smooth',block:'start'});
-}
-</script>
+    <script>
+        function hitungIMT() {
+            const bb = parseFloat(document.getElementById('bb').value) || 0;
+            const tb = parseFloat(document.getElementById('tb').value) || 0;
+            const el = document.getElementById('imtP');
+            if (bb > 0 && tb > 0) { el.textContent = (bb / Math.pow(tb / 100, 2)).toFixed(1) + ' kg/m²' } else { el.textContent = '—' }
+        }
+        document.getElementById('bb').addEventListener('input', hitungIMT);
+        document.getElementById('tb').addEventListener('input', hitungIMT);
+        hitungIMT();
+        function toggleC() {
+            const p = document.getElementById('calcP');
+            const b = document.getElementById('btnC');
+            p.classList.toggle('show');
+            b.textContent = p.classList.contains('show') ? '📐 Sembunyikan Perhitungan' : '📐 Lihat Perhitungan Manual Mamdani (Lengkap)';
+            if (p.classList.contains('show')) p.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
 </body>
+
 </html>
